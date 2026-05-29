@@ -3,18 +3,166 @@
 @tailwind utilities;
 
 :root {
-  --af-indigo-950: #0F0D2C;
-  --af-indigo-900: #1E1B4B;
-  --af-indigo-600: #4F46E5;
-  --af-coral-500: #FB7185;
+  /* Primary - Warm coral/pink */
+  --af-coral-50: #FFF5F6;
+  --af-coral-100: #FFE4E6;
+  --af-coral-200: #FECDD3;
   --af-coral-300: #FDA4AF;
-  --af-stone-50: #FAFAF7;
-  --af-stone-200: #E7E5DE;
+  --af-coral-400: #FB7185;
+  --af-coral-500: #F43F5E;
+  --af-coral-600: #E11D48;
+  --af-coral-700: #BE123C;
+
+  /* Indigo - Deep accent */
+  --af-indigo-950: #1A1333;
+  --af-indigo-900: #2D2456;
+  --af-indigo-800: #3D3380;
+  --af-indigo-600: #6366F1;
+  --af-indigo-500: #818CF8;
+
+  /* Stone - Warm neutrals */
+  --af-stone-50: #FDFCFA;
+  --af-stone-100: #F9F7F4;
+  --af-stone-200: #F0EDE8;
+  --af-stone-300: #E5E0D8;
+  --af-stone-400: #CCC7BE;
+  --af-stone-500: #9E9790;
   --af-stone-700: #44423C;
   --af-stone-900: #1C1B17;
+
+  /* Violet - Soft accent */
+  --af-violet-50: #F5F3FF;
+  --af-violet-100: #EDE9FE;
+  --af-violet-500: #8B5CF6;
+  --af-violet-600: #7C3AED;
+
+  /* Emerald - Success */
+  --af-emerald-50: #ECFDF5;
+  --af-emerald-100: #D1FAE5;
+  --af-emerald-500: #10B981;
+  --af-emerald-600: #059669;
+  --af-emerald-700: #047857;
+
+  /* Amber - Warning */
+  --af-amber-50: #FFFBEB;
+  --af-amber-100: #FEF3C7;
+  --af-amber-400: #FBBF24;
+  --af-amber-500: #F59E0B;
+
+  /* Rose - Error */
+  --af-rose-50: #FFF1F2;
+  --af-rose-100: #FFE4E6;
+  --af-rose-500: #F43F5E;
+  --af-rose-600: #E11D48;
+
+  /* Gradient presets */
+  --gradient-coral: linear-gradient(135deg, #F43F5E 0%, #FB7185 100%);
+  --gradient-violet: linear-gradient(135deg, #7C3AED 0%, #A78BFA 100%);
+  --gradient-indigo: linear-gradient(135deg, #2D2456 0%, #6366F1 100%);
+  --gradient-warm: linear-gradient(180deg, #FFF5F6 0%, #FDFCFA 100%);
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
   color: var(--af-stone-900);
   background: var(--af-stone-50);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--af-stone-100);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--af-stone-300);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--af-stone-400);
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Card hover effect */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -8px rgba(244, 63, 94, 0.15);
+}
+
+/* Gradient text */
+.text-gradient {
+  background: var(--gradient-coral);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Blob shapes for decoration */
+.blob-coral {
+  background: radial-gradient(circle at 30% 30%, #FDA4AF 0%, #F43F5E 100%);
+  opacity: 0.15;
+}
+
+.blob-violet {
+  background: radial-gradient(circle at 30% 30%, #A78BFA 0%, #7C3AED 100%);
+  opacity: 0.1;
+}
+
+/* Button press effect */
+.btn-press:active {
+  transform: scale(0.98);
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 2px solid var(--af-coral-400);
+  outline-offset: 2px;
+}
+
+/* Skeleton loading animation */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--af-stone-200) 25%,
+    var(--af-stone-100) 50%,
+    var(--af-stone-200) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
 }

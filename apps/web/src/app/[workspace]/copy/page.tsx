@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { Sparkles, Copy as CopyIcon, Loader2, AlertCircle, Check } from "lucide-react";
+import {
+  Sparkles,
+  Copy as CopyIcon,
+  Loader2,
+  AlertCircle,
+  Check,
+  FileText,
+} from "lucide-react";
 import {
   createCopy,
   listCopies,
@@ -36,10 +43,10 @@ const PLATFORMS: { id: PlatformId; label: string; group: "CN" | "Overseas" }[] =
   { id: "generic", label: "通用", group: "CN" },
 ];
 
-const LOCALES: { id: Locale; label: string }[] = [
-  { id: "zh-CN", label: "中文" },
-  { id: "en-US", label: "English" },
-  { id: "ja", label: "日本語" },
+const LOCALES: { id: Locale; label: string; flag: string }[] = [
+  { id: "zh-CN", label: "中文", flag: "🇨🇳" },
+  { id: "en-US", label: "English", flag: "🇺🇸" },
+  { id: "ja", label: "日本語", flag: "🇯🇵" },
 ];
 
 export default function CopyStudioPage() {
@@ -57,9 +64,7 @@ export default function CopyStudioPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Live + historical results for the selected garment.
   const [results, setResults] = useState<CopyRow[]>([]);
-  // Track open EventSource cleanups so navigating away doesn't leak.
   const subs = useRef<Map<string, () => void>>(new Map());
 
   // ---- Garments ----
@@ -120,7 +125,7 @@ export default function CopyStudioPage() {
       return;
     }
     if (variantCount > 12) {
-      setError("一次最多生成 12 个文案变体,请减少类型或平台数量");
+      setError("一次最多生成 12 个文案变体，请减少类型或平台数量");
       return;
     }
     setError(null);
@@ -140,10 +145,8 @@ export default function CopyStudioPage() {
         brief: brief.trim() || undefined,
       });
 
-      // Prepend the new queued rows so the user sees them immediately.
       setResults((cur) => [...created, ...cur]);
 
-      // Open one SSE per copy id; updates flow back into `results`.
       for (const row of created) {
         const close = subscribeCopyProgress(row.id, (ev) => {
           setResults((cur) =>
@@ -178,57 +181,66 @@ export default function CopyStudioPage() {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-6 p-6">
-      {/* ---------- Left rail: garment picker + brief ---------- */}
-      <aside className="col-span-4 space-y-6">
-        <header>
+    <div className="relative grid grid-cols-12 gap-6 p-6">
+      {/* Decorative background */}
+      <div className="pointer-events-none absolute -top-20 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-gradient-to-br from-coral-200/20 to-violet-200/10 blur-3xl" />
+
+      {/* ---------- Left rail: controls ---------- */}
+      <aside className="col-span-12 space-y-6 lg:col-span-4">
+        {/* Header */}
+        <div className="relative">
+          <div className="inline-flex items-center gap-2 rounded-full bg-coral-100/60 px-3 py-1 text-xs font-medium text-coral-600">
+            <Sparkles className="h-3 w-3" />
+            AI 文案工作室
+          </div>
           <h1
-            className="text-3xl italic text-[var(--af-indigo-950)]"
+            className="mt-4 text-3xl font-medium italic text-indigo-950"
             style={{ fontFamily: "'Fraunces', Georgia, serif" }}
           >
-            Copy Studio
+            文案生成
           </h1>
-          <p className="mt-1 text-sm text-[var(--af-stone-700)]">
+          <p className="mt-1 text-sm text-stone-600">
             为已上传的服装一键生成多平台、多语言营销文案
           </p>
-        </header>
+        </div>
 
-        <section className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {/* Garment picker */}
+        <section className="space-y-3">
+          <label className="text-xs font-medium uppercase tracking-wider text-stone-500">
             选择服装
           </label>
           {loadingGarments ? (
-            <div className="rounded-lg border border-slate-200 p-4 text-sm text-slate-400">
+            <div className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-400">
               加载中...
             </div>
           ) : garments.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 p-4 text-sm text-slate-500">
-              暂无服装,请先在 Garment Studio 上传一件。
+            <div className="rounded-xl border border-dashed border-stone-300 bg-stone-50/50 p-4 text-sm text-stone-500">
+              暂无服装，请在服装工作室上传一件。
             </div>
           ) : (
-            <div className="max-h-72 space-y-1 overflow-y-auto rounded-lg border border-slate-200 p-1">
+            <div className="max-h-48 space-y-2 overflow-y-auto rounded-xl border border-stone-200 bg-white p-2">
               {garments.map((g) => (
                 <button
                   key={g.id}
                   onClick={() => setSelectedGarmentId(g.id)}
                   className={cn(
-                    "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition",
+                    "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all",
                     selectedGarmentId === g.id
-                      ? "bg-[var(--af-coral-500)]/10 ring-1 ring-[var(--af-coral-500)]"
-                      : "hover:bg-[var(--af-stone-200)]/40",
+                      ? "bg-gradient-to-r from-coral-500/10 to-coral-100/20 ring-1 ring-coral-400/50"
+                      : "hover:bg-stone-100/60",
                   )}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={g.flatlayUrl}
                     alt={g.sku ?? g.id}
-                    className="h-10 w-10 rounded object-cover"
+                    className="h-10 w-10 rounded-lg object-cover"
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-medium text-slate-900">
+                    <div className="truncate text-sm font-medium text-stone-900">
                       {g.sku || g.id.slice(0, 8)}
                     </div>
-                    <div className="truncate text-xs text-slate-500">
+                    <div className="truncate text-xs text-stone-500">
                       {[g.fabric, g.silhouette, g.length].filter(Boolean).join(" · ") || "—"}
                     </div>
                   </div>
@@ -238,8 +250,9 @@ export default function CopyStudioPage() {
           )}
         </section>
 
-        <section className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {/* Language selector */}
+        <section className="space-y-3">
+          <label className="text-xs font-medium uppercase tracking-wider text-stone-500">
             语言
           </label>
           <div className="flex gap-2">
@@ -248,20 +261,22 @@ export default function CopyStudioPage() {
                 key={l.id}
                 onClick={() => setLocale(l.id)}
                 className={cn(
-                  "flex-1 rounded-md border px-3 py-2 text-sm transition",
+                  "flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 text-sm transition-all",
                   locale === l.id
-                    ? "border-[var(--af-coral-500)] bg-[var(--af-coral-500)]/10 text-[var(--af-indigo-950)]"
-                    : "border-[var(--af-stone-200)] text-[var(--af-stone-700)] hover:bg-[var(--af-stone-200)]/40",
+                    ? "border-coral-400 bg-coral-50/80 text-coral-600 ring-1 ring-coral-400/30"
+                    : "border-stone-200 text-stone-600 hover:bg-stone-100/60",
                 )}
               >
-                {l.label}
+                <span>{l.flag}</span>
+                <span className="font-medium">{l.label}</span>
               </button>
             ))}
           </div>
         </section>
 
-        <section className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {/* Copy types */}
+        <section className="space-y-3">
+          <label className="text-xs font-medium uppercase tracking-wider text-stone-500">
             文案类型
           </label>
           <div className="flex flex-wrap gap-2">
@@ -270,20 +285,22 @@ export default function CopyStudioPage() {
                 key={k.id}
                 onClick={() => toggleKind(k.id)}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs transition",
+                  "inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-sm transition-all",
                   selectedKinds.includes(k.id)
-                    ? "border-[var(--af-coral-500)] bg-[var(--af-coral-500)]/10 text-[var(--af-indigo-950)]"
-                    : "border-[var(--af-stone-200)] text-[var(--af-stone-700)] hover:bg-[var(--af-stone-200)]/40",
+                    ? "border-coral-400 bg-coral-50/80 text-coral-600"
+                    : "border-stone-200 text-stone-600 hover:bg-stone-100/60",
                 )}
               >
+                <FileText className="h-3.5 w-3.5" />
                 {k.label}
               </button>
             ))}
           </div>
         </section>
 
-        <section className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {/* Platforms */}
+        <section className="space-y-3">
+          <label className="text-xs font-medium uppercase tracking-wider text-stone-500">
             目标平台
           </label>
           <div className="flex flex-wrap gap-2">
@@ -292,10 +309,10 @@ export default function CopyStudioPage() {
                 key={p.id}
                 onClick={() => togglePlatform(p.id)}
                 className={cn(
-                  "rounded-full border px-3 py-1 text-xs transition",
+                  "rounded-full border px-3 py-1.5 text-xs transition-all",
                   selectedPlatforms.includes(p.id)
-                    ? "border-[var(--af-coral-500)] bg-[var(--af-coral-500)]/10 text-[var(--af-indigo-950)]"
-                    : "border-[var(--af-stone-200)] text-[var(--af-stone-700)] hover:bg-[var(--af-stone-200)]/40",
+                    ? "border-coral-400 bg-coral-50/80 text-coral-600"
+                    : "border-stone-200 text-stone-600 hover:bg-stone-100/60",
                 )}
               >
                 {p.label}
@@ -304,46 +321,59 @@ export default function CopyStudioPage() {
           </div>
         </section>
 
-        <section className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-wider text-slate-500">
+        {/* Brief */}
+        <section className="space-y-3">
+          <label className="text-xs font-medium uppercase tracking-wider text-stone-500">
             额外指令 (可选)
           </label>
           <textarea
             value={brief}
             onChange={(e) => setBrief(e.target.value)}
-            placeholder="例如:目标用户 25-35 岁通勤白领,强调通勤百搭"
-            className="h-24 w-full rounded-lg border border-[var(--af-stone-200)] bg-white p-3 text-sm placeholder:text-[var(--af-stone-700)]/50 focus:border-[var(--af-coral-500)] focus:outline-none focus:ring-1 focus:ring-[var(--af-coral-500)]"
+            placeholder="例如：目标用户 25-35 岁通勤白领，强调通勤百搭"
+            className="h-24 w-full resize-none rounded-xl border border-stone-200 bg-white p-4 text-sm placeholder:text-stone-400 focus:border-coral-400 focus:outline-none focus:ring-2 focus:ring-coral-400/20"
           />
         </section>
 
+        {/* Error */}
         {error && (
-          <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
-            <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>{error}</span>
+          <div className="flex items-start gap-2 rounded-xl border border-rose-200 bg-rose-50 p-4">
+            <AlertCircle className="h-4 w-4 shrink-0 text-rose-500" />
+            <span className="text-sm text-rose-600">{error}</span>
           </div>
         )}
 
+        {/* Generate button */}
         <button
           disabled={!selectedGarmentId || submitting || variantCount === 0}
           onClick={handleGenerate}
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--af-indigo-600)] px-4 py-3 text-sm font-medium text-white shadow-sm transition hover:bg-[var(--af-indigo-900)] disabled:cursor-not-allowed disabled:bg-[var(--af-stone-200)] disabled:text-[var(--af-stone-700)]"
+          className={cn(
+            "flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3.5 text-sm font-semibold shadow-md transition-all",
+            !selectedGarmentId || submitting || variantCount === 0
+              ? "bg-stone-200 text-stone-400 cursor-not-allowed"
+              : "bg-gradient-to-r from-coral-500 to-coral-600 text-white hover:shadow-lg hover:-translate-y-0.5 btn-press"
+          )}
         >
           {submitting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              生成中…
+            </>
           ) : (
-            <Sparkles className="h-4 w-4" />
+            <>
+              <Sparkles className="h-4 w-4" />
+              生成 {variantCount > 0 ? `${variantCount} 个` : ""}文案
+            </>
           )}
-          生成 {variantCount > 0 ? `${variantCount} 个` : ""}文案
         </button>
       </aside>
 
       {/* ---------- Right column: results ---------- */}
-      <main className="col-span-8">
+      <main className="col-span-12 lg:col-span-8">
         {results.length === 0 ? (
           <EmptyState
-            icon={<Sparkles className="h-5 w-5" />}
+            icon={<Sparkles className="h-6 w-6" />}
             title="An empty page, awaiting words."
-            description="选择左侧的服装、平台和语言,点击生成,文案会实时流式出现在这里。"
+            description="选择左侧的服装、平台和语言，点击生成，文案会实时流式出现在这里。"
           />
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -374,32 +404,36 @@ function CopyCard({ row }: { row: CopyRow }) {
   const kindLabel = KINDS.find((k) => k.id === row.kind)?.label ?? row.kind;
 
   return (
-    <article className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <header className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
-            {kindLabel}
-          </span>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
-            {platformLabel}
-          </span>
-          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-700">
-            {row.locale}
-          </span>
-        </div>
+    <article className="card-hover relative overflow-hidden rounded-2xl border border-stone-200/80 bg-white p-5 shadow-soft">
+      {/* Top accent line */}
+      <div className="absolute left-0 top-0 right-0 h-0.5 bg-gradient-to-r from-coral-500 to-violet-500" />
+
+      <header className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-coral-100/60 px-3 py-1 text-xs font-medium text-coral-600">
+          {kindLabel}
+        </span>
+        <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
+          {platformLabel}
+        </span>
+        <span className="rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
+          {row.locale}
+        </span>
         <StatusPill status={row.status} />
       </header>
 
-      <div className="min-h-[6rem] flex-1 whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-sm leading-relaxed text-slate-800">
+      <div className="min-h-[6rem] flex-1 whitespace-pre-wrap rounded-xl bg-gradient-to-br from-stone-50 to-stone-100/50 p-4 text-sm leading-relaxed text-stone-800">
         {row.status === "ready" && row.text}
         {row.status === "processing" && (
-          <span className="flex items-center gap-2 text-slate-400">
+          <span className="flex items-center gap-2 text-stone-400">
             <Loader2 className="h-3 w-3 animate-spin" />
-            qwen-max 正在生成...
+            qwen-max 正在生成…
           </span>
         )}
         {row.status === "queued" && (
-          <span className="text-slate-400">排队中</span>
+          <span className="flex items-center gap-2 text-stone-400">
+            <Loader2 className="h-3 w-3 animate-spin" />
+            排队中…
+          </span>
         )}
         {row.status === "failed" && (
           <span className="text-rose-600">
@@ -408,7 +442,7 @@ function CopyCard({ row }: { row: CopyRow }) {
         )}
       </div>
 
-      <footer className="mt-3 flex items-center justify-between text-xs text-slate-400">
+      <footer className="mt-4 flex items-center justify-between text-xs text-stone-400">
         <span>
           {row.provider ?? "—"}
           {row.costCents > 0 ? ` · ¥${(row.costCents / 100).toFixed(2)}` : ""}
@@ -416,7 +450,12 @@ function CopyCard({ row }: { row: CopyRow }) {
         <button
           disabled={!row.text}
           onClick={onCopy}
-          className="inline-flex items-center gap-1 rounded px-2 py-1 transition hover:bg-slate-100 disabled:opacity-30"
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-all",
+            copied
+              ? "bg-emerald-100/60 text-emerald-600"
+              : "hover:bg-stone-100 text-stone-600"
+          )}
         >
           {copied ? (
             <>
@@ -434,15 +473,16 @@ function CopyCard({ row }: { row: CopyRow }) {
 }
 
 function StatusPill({ status }: { status: CopyRow["status"] }) {
-  const map: Record<CopyRow["status"], string> = {
-    queued: "bg-slate-100 text-slate-600",
-    processing: "bg-amber-100 text-amber-700",
-    ready: "bg-emerald-100 text-emerald-700",
-    failed: "bg-rose-100 text-rose-700",
+  const map: Record<CopyRow["status"], { bg: string; text: string; label: string }> = {
+    queued: { bg: "bg-stone-100", text: "text-stone-600", label: "排队中" },
+    processing: { bg: "bg-amber-100", text: "text-amber-600", label: "生成中" },
+    ready: { bg: "bg-emerald-100/60", text: "text-emerald-600", label: "就绪" },
+    failed: { bg: "bg-rose-100", text: "text-rose-600", label: "失败" },
   };
+  const s = map[status];
   return (
-    <span className={cn("rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide", map[status])}>
-      {status}
+    <span className={cn("rounded-full px-2.5 py-0.5 text-[10px] font-medium", s.bg, s.text)}>
+      {s.label}
     </span>
   );
 }

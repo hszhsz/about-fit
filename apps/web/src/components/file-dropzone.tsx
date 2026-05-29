@@ -12,9 +12,8 @@ interface FileDropzoneProps {
 }
 
 /**
- * Drag-and-drop file picker. Handles click + drag-over + drop and
- * surfaces an inline spinner while the parent's onUpload promise
- * is in-flight. The parent owns all side effects (presign, POST, etc.).
+ * Modern drag-and-drop file picker with coral gradient accents.
+ * Surfaces inline spinner while parent's onUpload promise is in-flight.
  */
 export function FileDropzone({
   onUpload,
@@ -65,38 +64,54 @@ export function FileDropzone({
         onDrop={onDrop}
         disabled={uploading}
         className={cn(
-          "group relative flex w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-8 py-16 transition-all",
-          "border-[var(--af-stone-200)] bg-white/40 hover:border-[var(--af-indigo-600)]/60 hover:bg-[var(--af-indigo-600)]/5",
-          dragOver &&
-            "border-[var(--af-coral-500)] bg-[var(--af-coral-500)]/5 scale-[1.01]",
+          "group relative flex w-full flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed px-8 py-16 transition-all duration-300",
+          dragOver
+            ? "border-coral-400 bg-coral-50/80 scale-[1.01]"
+            : "border-stone-300 bg-white/60 hover:border-coral-400/60 hover:bg-stone-100/40",
           uploading && "cursor-wait opacity-80"
         )}
       >
+        {/* Gradient accent blob */}
         <div
           className={cn(
-            "flex h-14 w-14 items-center justify-center rounded-full transition-colors",
-            "bg-[var(--af-stone-200)]/60 text-[var(--af-indigo-900)]",
-            "group-hover:bg-[var(--af-indigo-600)]/10 group-hover:text-[var(--af-indigo-600)]",
-            dragOver && "bg-[var(--af-coral-500)]/15 text-[var(--af-coral-500)]"
+            "absolute -right-8 -top-8 h-32 w-32 rounded-full bg-gradient-to-br from-coral-200/40 to-transparent blur-2xl transition-opacity duration-300",
+            dragOver ? "opacity-100" : "opacity-0 group-hover:opacity-60"
+          )}
+        />
+
+        {/* Upload icon with gradient */}
+        <div
+          className={cn(
+            "relative flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-300",
+            "bg-gradient-to-br from-coral-500 to-coral-600 shadow-lg",
+            dragOver && "scale-110 shadow-glow-coral",
+            "group-hover:scale-105"
           )}
         >
-          {uploading ? (
-            <Loader2 className="h-6 w-6 animate-spin" />
-          ) : (
-            <UploadCloud className="h-6 w-6" />
-          )}
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20">
+            {uploading ? (
+              <Loader2 className="h-6 w-6 animate-spin text-white" />
+            ) : (
+              <UploadCloud className="h-6 w-6 text-white" />
+            )}
+          </div>
         </div>
-        <p className="text-sm text-[var(--af-stone-700)]">
-          {uploading ? "正在上传…" : hint}
-        </p>
-        <p className="text-xs text-[var(--af-stone-700)]/70">
-          支持 JPG / PNG / WebP
-        </p>
+
+        <div className="relative text-center">
+          <p className="text-base font-medium text-stone-700">
+            {uploading ? "正在上传…" : hint}
+          </p>
+          <p className="mt-1 text-xs text-stone-400">
+            支持 JPG / PNG / WebP
+          </p>
+        </div>
       </button>
 
-      {error ? (
-        <p className="mt-3 text-xs text-[var(--af-coral-500)]">{error}</p>
-      ) : null}
+      {error && (
+        <div className="mt-3 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+          <span className="text-sm text-rose-600">{error}</span>
+        </div>
+      )}
 
       <input
         ref={inputRef}
@@ -106,7 +121,6 @@ export function FileDropzone({
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) void handleFile(file);
-          // Reset so the same file can be picked twice in a row.
           e.target.value = "";
         }}
       />
