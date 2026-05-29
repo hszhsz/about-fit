@@ -18,9 +18,9 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "test:e2e": "turbo run test:e2e",
-    "db:migrate": "pnpm --filter @about-fit/api prisma migrate dev",
-    "db:generate": "pnpm --filter @about-fit/api prisma generate",
-    "db:studio": "pnpm --filter @about-fit/api prisma studio",
+    "db:migrate": "bash scripts/link-env.sh && pnpm --filter @about-fit/api exec prisma migrate dev",
+    "db:generate": "bash scripts/link-env.sh && pnpm --filter @about-fit/api exec prisma generate",
+    "db:studio": "bash scripts/link-env.sh && pnpm --filter @about-fit/api exec prisma studio",
     "docker:up": "docker compose -f infra/docker-compose.yml up -d",
     "docker:down": "docker compose -f infra/docker-compose.yml down",
     "docker:logs": "docker compose -f infra/docker-compose.yml logs -f"

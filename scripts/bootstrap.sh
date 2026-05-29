@@ -107,6 +107,12 @@ else
   ok ".env already exists (left untouched)"
 fi
 
+# Prisma CLI loads .env relative to the package it runs in (apps/api/),
+# not the monorepo root. Mirror the root .env into apps/api/ via a symlink
+# so 'prisma migrate' / 'prisma generate' see DATABASE_URL regardless of cwd.
+bash scripts/link-env.sh
+ok "Linked apps/api/.env -> ../../.env (for Prisma CLI)"
+
 # ─── 3. docker compose ───────────────────────────────────────────────────────
 step "3/6  Infra (Postgres + Redis + MinIO)"
 
