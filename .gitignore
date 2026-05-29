@@ -9,6 +9,12 @@ dist/
 build/
 out/
 
+# TypeScript build info (machine-generated)
+*.tsbuildinfo
+
+# Next.js
+apps/web/next-env.d.ts
+
 # Env
 .env
 .env.local
@@ -31,12 +37,12 @@ coverage/
 .nyc_output/
 
 # Prisma
-prisma/migrations/dev/
+prisma/migrations/
 
 # OS
 Thumbs.db
 
-# Local dev
+# Local dev data
 .minio/
 .postgres-data/
 .redis-data/
