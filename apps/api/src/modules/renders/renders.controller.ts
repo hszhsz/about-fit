@@ -1,23 +1,50 @@
-import { Controller, Post, Get, Param, Body, Sse } from '@nestjs/common';
-import { RendersService } from './renders.service';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Sse,
+  UsePipes,
+  PipeTransform,
+  Injectable,
+  BadRequestException,
+  ArgumentMetadata,
+} from '@nestjs/common';
+import { ZodSchema } from 'zod';
+import { RendersService, RenderProgressEvent } from './renders.service';
+import { CreateRenderDto } from './renders.dto';
+import { Observable } from 'rxjs';
 
-// TODO: Add auth guard, workspace scope, request DTO validation
-// TODO: Implement SSE stream via Redis pub/sub on render:${id}:progress
+@Injectable()
+class ZodPipe<T> implements PipeTransform {
+  constructor(private readonly schema: ZodSchema<T>) {}
+  transform(value: unknown, _m: ArgumentMetadata): T {
+    const r = this.schema.safeParse(value);
+    if (!r.success) {
+      throw new BadRequestException({ message: 'Validation failed', issues: r.error.issues });
+    }
+    return r.data;
+  }
+}
 
 @Controller('renders')
 export class RendersController {
   constructor(private readonly rendersService: RendersService) {}
 
   @Post()
-  create(@Body() body: { garmentId: string; virtualModelId: string }) {
-    // TODO: Validate DTO, enqueue BullMQ job
-    return this.rendersService.create(body);
+  @UsePipes(new ZodPipe(CreateRenderDto))
+  create(@Body() dto: CreateRenderDto) {
+    return this.rendersService.create(dto);
   }
 
-  @Get(':id/stream')
-  stream(@Param('id') id: string) {
-    // TODO: Return SSE observable subscribing to Redis pub/sub channel
-    // For now return a placeholder
+  @Get(':id')
+  findOne(@Param('id') id: string) {
     return this.rendersService.findOne(id);
+  }
+
+  @Sse(':id/stream')
+  stream(@Param('id') id: string): Observable<{ data: RenderProgressEvent }> {
+    return this.rendersService.streamProgress(id);
   }
 }

@@ -11,7 +11,7 @@ export default function WorkspaceLayout({
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <aside className="w-[240px] shrink-0 border-r border-[var(--af-stone-200)] bg-white">
-        <Sidebar workspaceName={params.workspace} />
+        <Sidebar workspace={params.workspace} />
       </aside>
 
       {/* Main content */}

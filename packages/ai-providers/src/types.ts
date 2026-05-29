@@ -16,7 +16,17 @@ export interface GenerateOptions {
   consistency?: {
     faceEmbedding: number[];
     bodyEmbedding: number[];
+    /**
+     * Optional URL to the original reference image. Required by vendors like
+     * DashScope that accept a `refImage` URL instead of raw embeddings.
+     */
+    referenceImageUrl?: string;
   };
+  /**
+   * Output locale for text generation intents (e.g. copy.*).
+   * Defaults to 'zh-CN' when omitted.
+   */
+  locale?: "zh-CN" | "en-US" | "ja";
   workspaceId: string;
 }
 

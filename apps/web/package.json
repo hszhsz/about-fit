@@ -17,7 +17,9 @@
     "zustand": "^4.5.0",
     "@tanstack/react-query": "^5.40.0",
     "@about-fit/domain": "workspace:*",
-    "@about-fit/platform-presets": "workspace:*"
+    "@about-fit/platform-presets": "workspace:*",
+    "lucide-react": "^0.400.0",
+    "clsx": "^2.1.0"
   },
   "devDependencies": {
     "typescript": "^5.5.0",

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import { BullModule } from '@nestjs/bullmq';
 import { GarmentsController } from './garments.controller';
 import { GarmentsService } from './garments.service';
 
-// TODO: Add guards, interceptors, and DTO validation pipes
-
 @Module({
+  imports: [BullModule.registerQueue({ name: 'garment.segment' })],
   controllers: [GarmentsController],
   providers: [GarmentsService],
   exports: [GarmentsService],
