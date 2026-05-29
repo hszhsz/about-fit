@@ -1,0 +1,30 @@
+{
+  "name": "about-fit",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Open-source AI marketing studio for apparel brands.",
+  "license": "Apache-2.0",
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "db:migrate": "pnpm --filter @about-fit/api prisma migrate dev",
+    "db:generate": "pnpm --filter @about-fit/api prisma generate",
+    "db:studio": "pnpm --filter @about-fit/api prisma studio",
+    "docker:up": "docker compose -f infra/docker-compose.yml up -d",
+    "docker:down": "docker compose -f infra/docker-compose.yml down",
+    "docker:logs": "docker compose -f infra/docker-compose.yml logs -f"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0",
+    "prettier": "^3.3.0"
+  }
+}

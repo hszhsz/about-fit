@@ -1,0 +1,26 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  theme: {
+    extend: {
+      colors: {
+        "af-indigo-950": "#0F0D2C",
+        "af-indigo-900": "#1E1B4B",
+        "af-indigo-600": "#4F46E5",
+        "af-coral-500": "#FB7185",
+        "af-coral-300": "#FDA4AF",
+        "af-stone-50": "#FAFAF7",
+        "af-stone-200": "#E7E5DE",
+        "af-stone-700": "#44423C",
+        "af-stone-900": "#1C1B17",
+      },
+      fontFamily: {
+        display: ["Fraunces", "serif"],
+        sans: ["Inter", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
+      },
+    },
+  },
+};
+
+export default config;

@@ -1,0 +1,125 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+model Workspace {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  tier        String            @default("free")
+  createdAt   DateTime          @default(now())
+  members     WorkspaceMember[]
+  collections Collection[]
+  models      VirtualModel[]
+}
+
+model User {
+  id          String            @id @default(cuid())
+  email       String            @unique
+  name        String?
+  avatarUrl   String?
+  memberships WorkspaceMember[]
+}
+
+model WorkspaceMember {
+  id          String    @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([workspaceId, userId])
+}
+
+model Collection {
+  id          String     @id @default(cuid())
+  name        String
+  season      String
+  workspaceId String
+  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  garments    Garment[]
+  lookbooks   Lookbook[]
+}
+
+model Garment {
+  id                   String     @id @default(cuid())
+  sku                  String?
+  collectionId         String
+  flatlayUrl           String
+  segmentationMaskUrl  String?
+  fabric               String?
+  silhouette           String?
+  length               String?
+  status               String     @default("draft")
+  collection           Collection @relation(fields: [collectionId], references: [id])
+  renders              Render[]
+  sizeChart            SizeChart?
+}
+
+model VirtualModel {
+  id                String                      @id @default(cuid())
+  workspaceId       String
+  name              String
+  referenceImageUrl String
+  faceEmbedding     Unsupported("vector(512)")
+  bodyEmbedding     Unsupported("vector(512)")
+  workspace         Workspace                   @relation(fields: [workspaceId], references: [id])
+  renders           Render[]
+}
+
+model Render {
+  id             String       @id @default(cuid())
+  garmentId      String
+  virtualModelId String
+  status         String       @default("queued")
+  provider       String?
+  costCents      Int          @default(0)
+  promptVersion  String
+  resultUrl      String?
+  errorMessage   String?
+  createdAt      DateTime     @default(now())
+  garment        Garment      @relation(fields: [garmentId], references: [id])
+  virtualModel   VirtualModel @relation(fields: [virtualModelId], references: [id])
+}
+
+model Lookbook {
+  id           String         @id @default(cuid())
+  collectionId String
+  name         String
+  shots        LookbookShot[]
+  collection   Collection     @relation(fields: [collectionId], references: [id])
+}
+
+model LookbookShot {
+  id         String   @id @default(cuid())
+  lookbookId String
+  order      Int
+  renderId   String?
+  caption    String?
+  lookbook   Lookbook @relation(fields: [lookbookId], references: [id])
+}
+
+model SizeChart {
+  id        String  @id @default(cuid())
+  garmentId String  @unique
+  region    String
+  json      Json
+  garment   Garment @relation(fields: [garmentId], references: [id])
+}
+
+model BrandKit {
+  id          String   @id @default(cuid())
+  workspaceId String   @unique
+  tone        Json
+  palette     Json
+  bannedWords String[]
+  hashtags    String[]
+}
