@@ -8,7 +8,8 @@ import { UploadsModule } from './modules/uploads/uploads.module';
 import { GarmentsModule } from './modules/garments/garments.module';
 import { VirtualModelsModule } from './modules/virtual-models/virtual-models.module';
 import { RendersModule } from './modules/renders/renders.module';
-// TODO(M2+): AuthModule, WorkspacesModule, CopyModule, PlatformsModule
+import { CopyModule } from './modules/copy/copy.module';
+// TODO(M3+): AuthModule, WorkspacesModule, PlatformsModule
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { RendersModule } from './modules/renders/renders.module';
     GarmentsModule,
     VirtualModelsModule,
     RendersModule,
+    CopyModule,
   ],
 })
 export class AppModule {}

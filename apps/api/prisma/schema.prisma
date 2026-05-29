@@ -61,7 +61,33 @@ model Garment {
   status               String     @default("draft")
   collection           Collection @relation(fields: [collectionId], references: [id])
   renders              Render[]
+  copies               Copy[]
   sizeChart            SizeChart?
+}
+
+/// Marketing copy generated for a garment.
+/// kind ∈ { 'title', 'description', 'hashtags' }
+/// locale ∈ { 'zh-CN', 'en-US', 'ja' }
+/// platform is one of PlatformId (taobao-main, douyin-feed, xiaohongshu, ...)
+/// status ∈ { 'queued', 'processing', 'ready', 'failed' }
+model Copy {
+  id            String   @id @default(cuid())
+  garmentId    String
+  workspaceId  String
+  kind         String
+  platform     String
+  locale       String
+  status       String   @default("queued")
+  text         String?
+  provider     String?
+  costCents    Int      @default(0)
+  errorMessage String?
+  promptVersion String  @default("v1")
+  createdAt    DateTime @default(now())
+  garment      Garment  @relation(fields: [garmentId], references: [id])
+
+  @@index([garmentId])
+  @@index([workspaceId])
 }
 
 model VirtualModel {

@@ -238,3 +238,107 @@ export function subscribeRenderProgress(
   };
   return () => es.close();
 }
+
+// ---------- Copy Studio ----------
+
+export type CopyKind = "title" | "description" | "hashtags";
+export type Locale = "zh-CN" | "en-US" | "ja";
+export type CopyStatus = "queued" | "processing" | "ready" | "failed";
+
+export type PlatformId =
+  | "taobao-main"
+  | "taobao-detail"
+  | "douyin-feed"
+  | "douyin-cover"
+  | "shopify-hero"
+  | "tiktok-shop"
+  | "amazon-a-plus-banner"
+  | "amazon-a-plus-square"
+  | "xiaohongshu"
+  | "instagram-feed"
+  | "instagram-story"
+  | "generic";
+
+export interface CopyVariantInput {
+  kind: CopyKind;
+  platform: PlatformId;
+  locale: Locale;
+}
+
+export interface CopyRow {
+  id: string;
+  garmentId: string;
+  workspaceId: string;
+  kind: CopyKind;
+  platform: PlatformId;
+  locale: Locale;
+  status: CopyStatus;
+  text?: string | null;
+  provider?: string | null;
+  costCents: number;
+  errorMessage?: string | null;
+  promptVersion: string;
+  createdAt: string;
+}
+
+export interface CopyProgressEvent {
+  copyId: string;
+  status: CopyStatus;
+  text?: string;
+  errorMessage?: string;
+  costCents?: number;
+  provider?: string;
+}
+
+export async function createCopy(input: {
+  garmentId: string;
+  workspaceId: string;
+  variants: CopyVariantInput[];
+  brief?: string;
+}): Promise<CopyRow[]> {
+  return request<CopyRow[]>("/copy", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listCopies(params: {
+  garmentId?: string;
+  workspaceId?: string;
+  kind?: CopyKind;
+  platform?: PlatformId;
+  locale?: Locale;
+  limit?: number;
+}): Promise<CopyRow[]> {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v != null) q.set(k, String(v));
+  }
+  const qs = q.toString();
+  return request<CopyRow[]>(`/copy${qs ? `?${qs}` : ""}`);
+}
+
+export async function getCopy(id: string): Promise<CopyRow> {
+  return request<CopyRow>(`/copy/${encodeURIComponent(id)}`);
+}
+
+/**
+ * Subscribe to SSE stream for a single Copy row. Mirrors
+ * subscribeRenderProgress; returns a cleanup function.
+ */
+export function subscribeCopyProgress(
+  copyId: string,
+  onEvent: (ev: CopyProgressEvent) => void
+): () => void {
+  const url = `${API_BASE}/copy/${encodeURIComponent(copyId)}/stream`;
+  const es = new EventSource(url);
+  es.onmessage = (msg) => {
+    try {
+      onEvent(JSON.parse(msg.data) as CopyProgressEvent);
+    } catch {
+      // ignore malformed
+    }
+  };
+  es.onerror = () => es.close();
+  return () => es.close();
+}
