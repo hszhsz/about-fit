@@ -10,6 +10,11 @@ interface ModelRow {
   createdAt: Date;
 }
 
+// Re-export so controllers that use service methods as return types don't
+// hit TS4053 ("private name in declaration"). The interface itself stays
+// the canonical shape; consumers should import `ModelRow` from here.
+export type { ModelRow };
+
 @Injectable()
 export class VirtualModelsService {
   private readonly logger = new Logger(VirtualModelsService.name);
