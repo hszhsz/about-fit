@@ -45,15 +45,56 @@ See [`docs/architecture.md`](./docs/architecture.md) for the full stack table an
 | [Prompt 02 — UI / UX Spec](./docs/prompts/02-ui-ux.md) | Design language, layout, components |
 | [Prompt 03 — Implementation Plan](./docs/prompts/03-implementation.md) | NestJS modules, delivery order, milestones |
 
-## 🚀 Quick start (placeholder)
+## 🚀 Quick start
+
+**Prerequisites:** Node ≥ 20.11, pnpm 9, Docker (with Compose v2).
 
 ```bash
-# coming soon
-pnpm install
+git clone https://github.com/hszhsz/about-fit.git
+cd about-fit
+
+# One-key bootstrap: copies .env, boots Postgres + Redis + MinIO,
+# installs deps, runs prisma migrations, creates buckets.
+pnpm bootstrap
+
+# Then start everything in one terminal:
 pnpm dev
+# …or scope to a single app:
+#   pnpm --filter @about-fit/api dev      # http://localhost:4000/api
+#   pnpm --filter @about-fit/web dev      # http://localhost:3000
+#   pnpm --filter @about-fit/worker dev
 ```
 
-> The first milestone (M0 — scaffolding + Garment Studio MVP) is in progress. Track it on the [Projects board](https://github.com/hszhsz/about-fit/projects).
+| What you get | URL | Credentials |
+|---|---|---|
+| Web app | http://localhost:3000 | — |
+| API | http://localhost:4000/api | — |
+| MinIO console | http://localhost:9001 | `aboutfit` / `aboutfit-dev-secret` |
+
+> **Need an API key?** Edit `.env` and set `DASHSCOPE_API_KEY` before generating renders or copy. Everything else (browsing, uploads, schema) works out of the box.
+
+### Bootstrap variants
+
+```bash
+pnpm bootstrap          # provision only (idempotent, safe to re-run)
+pnpm bootstrap:dev      # provision then auto-run `pnpm dev`
+pnpm bootstrap:reset    # wipe Docker volumes (Postgres/Redis/MinIO) and reprovision
+```
+
+### Tear down
+
+```bash
+pnpm docker:down                                       # stop containers, keep volumes
+docker compose -f infra/docker-compose.yml down -v     # also drop volumes
+```
+
+### Milestone status
+
+- ✅ **M0** — Monorepo scaffolding (api / web / worker / packages)
+- ✅ **M1** — Garment Studio MVP (upload, virtual models, on-model render with SSE)
+- ✅ **M2** — Copy Studio (title / description / hashtags, zh-CN · en-US · ja, per-platform tuning)
+- ✅ **M3** — Multi-platform Export (sharp resize + ZIP bundle, 11 platform presets)
+- ⏳ **M4+** — Size charts, lookbook video, brand-locked face/body embeddings
 
 ## 🤝 Contributing
 
