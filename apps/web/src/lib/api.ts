@@ -342,3 +342,88 @@ export function subscribeCopyProgress(
   es.onerror = () => es.close();
   return () => es.close();
 }
+
+// ---------- Exports ----------
+
+export type ExportStatus = "queued" | "processing" | "ready" | "failed";
+
+export interface ExportItem {
+  id: string;
+  exportId: string;
+  renderId?: string | null;
+  sourceUrl: string;
+  presetId: PlatformId;
+  width: number;
+  height: number;
+  format: string;
+  status: ExportStatus;
+  outputUrl?: string | null;
+  errorMessage?: string | null;
+}
+
+export interface ExportBatch {
+  id: string;
+  workspaceId: string;
+  garmentId?: string | null;
+  status: ExportStatus;
+  zipUrl?: string | null;
+  totalItems: number;
+  doneItems: number;
+  errorMessage?: string | null;
+  createdAt: string;
+  items?: ExportItem[];
+}
+
+export interface ExportProgressEvent {
+  exportId: string;
+  status: ExportStatus;
+  doneItems?: number;
+  totalItems?: number;
+  zipUrl?: string;
+  errorMessage?: string;
+  item?: {
+    id: string;
+    presetId: PlatformId;
+    status: ExportStatus;
+    outputUrl?: string;
+    errorMessage?: string;
+  };
+}
+
+export async function createExport(input: {
+  workspaceId: string;
+  presets: PlatformId[];
+  garmentId?: string;
+  renderIds?: string[];
+}): Promise<ExportBatch> {
+  return request<ExportBatch>("/exports", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getExport(id: string): Promise<ExportBatch> {
+  return request<ExportBatch>(`/exports/${encodeURIComponent(id)}`);
+}
+
+export async function listExports(workspaceId: string): Promise<ExportBatch[]> {
+  const q = new URLSearchParams({ workspaceId }).toString();
+  return request<ExportBatch[]>(`/exports?${q}`);
+}
+
+export function subscribeExportProgress(
+  exportId: string,
+  onEvent: (ev: ExportProgressEvent) => void
+): () => void {
+  const url = `${API_BASE}/exports/${encodeURIComponent(exportId)}/stream`;
+  const es = new EventSource(url);
+  es.onmessage = (msg) => {
+    try {
+      onEvent(JSON.parse(msg.data) as ExportProgressEvent);
+    } catch {
+      // ignore malformed
+    }
+  };
+  es.onerror = () => es.close();
+  return () => es.close();
+}

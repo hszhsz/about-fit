@@ -5,6 +5,7 @@ import IORedis from 'ioredis';
 import { processSegment } from './workers/segment.worker.js';
 import { processRender } from './workers/render.worker.js';
 import { processCopy } from './workers/copy.worker.js';
+import { processExport } from './workers/export.worker.js';
 
 const REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379';
 
@@ -20,12 +21,13 @@ function createWorkers() {
   }, { connection });
   const renderWorker = new Worker('render.on-model', processRender, { connection });
   const copyWorker = new Worker('copy.generate', processCopy, { connection });
+  const exportWorker = new Worker('export.bundle', processExport, { connection });
   const videoWorker = new Worker('video.lookbook', async (job) => {
     // TODO: Implement video lookbook worker
     console.log(`[video.lookbook] Processing job ${job.id}`, job.data);
   }, { connection });
 
-  workers.push(segmentWorker, attributeWorker, renderWorker, copyWorker, videoWorker);
+  workers.push(segmentWorker, attributeWorker, renderWorker, copyWorker, exportWorker, videoWorker);
 }
 
 async function shutdown() {

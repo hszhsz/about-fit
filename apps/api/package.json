@@ -22,7 +22,6 @@
     "zod": "^3.23.0",
     "@about-fit/domain": "workspace:*",
     "@about-fit/ai-providers": "workspace:*",
-    "@about-fit/platform-presets": "workspace:*",
     "@aws-sdk/client-s3": "^3.600.0",
     "@aws-sdk/s3-request-presigner": "^3.600.0",
     "cuid": "^3.0.0",

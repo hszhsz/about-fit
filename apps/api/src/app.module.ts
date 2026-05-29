@@ -9,7 +9,8 @@ import { GarmentsModule } from './modules/garments/garments.module';
 import { VirtualModelsModule } from './modules/virtual-models/virtual-models.module';
 import { RendersModule } from './modules/renders/renders.module';
 import { CopyModule } from './modules/copy/copy.module';
-// TODO(M3+): AuthModule, WorkspacesModule, PlatformsModule
+import { ExportsModule } from './modules/exports/exports.module';
+// TODO(M4+): AuthModule, WorkspacesModule
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { CopyModule } from './modules/copy/copy.module';
     VirtualModelsModule,
     RendersModule,
     CopyModule,
+    ExportsModule,
   ],
 })
 export class AppModule {}

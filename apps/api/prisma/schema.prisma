@@ -114,6 +114,47 @@ model Render {
   createdAt      DateTime     @default(now())
   garment        Garment      @relation(fields: [garmentId], references: [id])
   virtualModel   VirtualModel @relation(fields: [virtualModelId], references: [id])
+  exportItems    ExportItem[]
+}
+
+/// A batch export job. One Export ↔ N ExportItem (one per source × preset).
+/// status ∈ { 'queued', 'processing', 'ready', 'failed' }
+/// zipUrl is the bundled archive uploaded to S3 once all items succeed.
+model Export {
+  id           String       @id @default(cuid())
+  workspaceId  String
+  garmentId    String?
+  status       String       @default("queued")
+  zipUrl       String?
+  totalItems   Int          @default(0)
+  doneItems    Int          @default(0)
+  errorMessage String?
+  createdAt    DateTime     @default(now())
+  items        ExportItem[]
+
+  @@index([workspaceId])
+  @@index([garmentId])
+}
+
+/// One resized output: one source image × one platform preset.
+/// status mirrors the parent's lifecycle but per-item so we can show
+/// granular progress in the UI.
+model ExportItem {
+  id           String   @id @default(cuid())
+  exportId     String
+  renderId     String?
+  sourceUrl    String
+  presetId     String
+  width        Int
+  height       Int
+  format       String
+  status       String   @default("queued")
+  outputUrl    String?
+  errorMessage String?
+  export       Export   @relation(fields: [exportId], references: [id], onDelete: Cascade)
+  render       Render?  @relation(fields: [renderId], references: [id])
+
+  @@index([exportId])
 }
 
 model Lookbook {

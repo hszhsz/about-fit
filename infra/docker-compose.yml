@@ -61,7 +61,9 @@ services:
       mc alias set local http://minio:9000 aboutfit aboutfit-dev-secret;
       mc mb --ignore-existing local/about-fit-uploads;
       mc mb --ignore-existing local/about-fit-renders;
+      mc mb --ignore-existing local/about-fit-exports;
       mc anonymous set download local/about-fit-renders;
+      mc anonymous set download local/about-fit-exports;
       exit 0;
       "
 

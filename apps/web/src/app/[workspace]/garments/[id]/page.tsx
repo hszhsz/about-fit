@@ -13,6 +13,7 @@ import {
 } from "@/lib/api";
 import { ModelPicker } from "@/components/model-picker";
 import { RenderProgress } from "@/components/render-progress";
+import { PlatformPresetBar } from "@/components/platform-preset-bar";
 import { cn } from "@/lib/utils";
 
 export default function GarmentDetailPage() {
@@ -219,6 +220,16 @@ export default function GarmentDetailPage() {
           </div>
         )}
       </section>
+
+      {/* Multi-platform export — only show if there's at least one ready render */}
+      {renders.some((r) => r.status === "ready") && (
+        <section className="mt-12">
+          <PlatformPresetBar
+            workspaceId={workspaceId}
+            garmentId={garmentId}
+          />
+        </section>
+      )}
     </div>
   );
 }
